@@ -12,13 +12,11 @@ import java.util.Set;
 public class PeerUI extends JFrame {
     private JTextField usernameField, portField, ipField, peerPortField, messageField;
     private JTextArea chatArea;
-    private JButton startPeerButton, connectButton, sendButton;
+    private JButton startPeerButton, connectButton, sendButton, historyButton;
     private DefaultListModel<String> peerListModel;
     private JList<String> peerList;
     private ConnectionPeer connectionPeer;
     private final Set<String> displayedMessages = new HashSet<>();
-
-
 
     public PeerUI() {
         setTitle("P2P Chat");
@@ -67,18 +65,25 @@ public class PeerUI extends JFrame {
         chatArea.setEditable(false);
         add(new JScrollPane(chatArea), BorderLayout.CENTER);
 
-        // Painel inferior para mensagens
+        // Painel inferior para mensagens e histórico
         JPanel messagePanel = new JPanel(new BorderLayout());
         messageField = new JTextField();
         sendButton = new JButton("Enviar");
+        historyButton = new JButton("Histórico"); // Botão de histórico
+
+        JPanel buttonPanel = new JPanel(new GridLayout(1, 2));
+        buttonPanel.add(sendButton);
+        buttonPanel.add(historyButton);
+
         messagePanel.add(messageField, BorderLayout.CENTER);
-        messagePanel.add(sendButton, BorderLayout.EAST);
+        messagePanel.add(buttonPanel, BorderLayout.EAST);
         add(messagePanel, BorderLayout.SOUTH);
 
         // Eventos dos botões
         startPeerButton.addActionListener(e -> startPeer());
         connectButton.addActionListener(e -> connectToPeer());
         sendButton.addActionListener(e -> sendMessage());
+        historyButton.addActionListener(e -> showChatHistory()); // Novo evento do botão de histórico
 
         setVisible(true);
     }
@@ -100,8 +105,8 @@ public class PeerUI extends JFrame {
 
         new Thread(this::updatePeerList).start();
         listenForMessages();
-
     }
+
     private void updatePeerList() {
         while (true) {
             List<String> peers = PeerSearch.requestPeersFromNetwork();
@@ -118,7 +123,6 @@ public class PeerUI extends JFrame {
             }
         }
     }
-
 
     private void connectToPeer() {
         String host = ipField.getText();
@@ -140,10 +144,14 @@ public class PeerUI extends JFrame {
         String message = messageField.getText();
         if (!message.isEmpty() && connectionPeer != null) {
             connectionPeer.broadcastMessage(message);
-            chatArea.append("Você: " + message + "\n");
+
+            String formattedMessage = "Você: " + message;
+            chatArea.append(formattedMessage + "\n");
+            connectionPeer.getReceivedMessages().add(formattedMessage);
             messageField.setText("");
         }
     }
+
 
     private void listenForMessages() {
         new Thread(() -> {
@@ -167,8 +175,28 @@ public class PeerUI extends JFrame {
         }).start();
     }
 
+    private void showChatHistory() {
+        if (connectionPeer == null) {
+            JOptionPane.showMessageDialog(this, "Nenhum peer iniciado!", "Erro", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
 
+        List<String> history = connectionPeer.getReceivedMessages();
+        if (history.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "Nenhuma mensagem no histórico.", "Histórico", JOptionPane.INFORMATION_MESSAGE);
+        } else {
+            JTextArea historyArea = new JTextArea();
+            historyArea.setEditable(false);
+            for (String message : history) {
+                historyArea.append(message + "\n");
+            }
 
+            JScrollPane scrollPane = new JScrollPane(historyArea);
+            scrollPane.setPreferredSize(new Dimension(400, 300));
+
+            JOptionPane.showMessageDialog(this, scrollPane, "Histórico de Mensagens", JOptionPane.INFORMATION_MESSAGE);
+        }
+    }
     public static void main(String[] args) {
         SwingUtilities.invokeLater(PeerUI::new);
     }
