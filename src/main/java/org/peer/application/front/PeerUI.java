@@ -1,4 +1,4 @@
-package org.peer.front;
+package org.peer.application.front;
 
 import org.peer.network.ConnectionPeer;
 import org.peer.network.PeerSearch;
