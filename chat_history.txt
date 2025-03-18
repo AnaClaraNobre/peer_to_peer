@@ -1,0 +1,32 @@
+[Você] S
+[Você] S
+[Você] S
+[Você] n
+[Você] S
+[Você] S
+[Você] S
+[Você] S
+[Você] 8080
+[Você] hello ana
+Angelo: hello ana
+[Você] a
+Ana: a
+[Você] aaa
+Ana: aaa
+[Você] 
+Ana: 
+[Você] S
+[Você] n
+[Você] S
+[Você] S
+[Você] localhost
+[Você] 8080
+[Você] hello ana
+Angelo : hello ana
+[Você] 
+Angelo : 
+[Você] a
+Ana: a
+Ana: hi
+angelo: hii ana
+ana: hi angelo!
